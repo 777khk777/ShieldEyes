@@ -60,42 +60,60 @@
   let allData = [];
   let currentRange = "last24h";
 
-  // ── Date range helpers ───────────────────────────────────────────────────────
-  function getDateRange(range) {
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let start, end = new Date();
+  // ── Date range helpers (string-based — no timezone issues) ──────────────────
+  // Timestamps are stored as "YYYY-MM-DD HH:MM:SS" in sensor local time.
+  // We derive "now" from the newest timestamp so the clock always matches the data.
 
-    if (range === "today") {
-      start = todayStart;
-    } else if (range === "yesterday") {
-      start = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
-      end   = new Date(todayStart.getTime() - 1);
-    } else if (range === "thisweek") {
-      const dow = now.getDay();
-      const daysToMon = (dow === 0) ? 6 : dow - 1;
-      start = new Date(todayStart.getTime() - daysToMon * 24 * 60 * 60 * 1000);
-    } else if (range === "thismonth") {
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else if (range === "thisyear") {
-      start = new Date(now.getFullYear(), 0, 1);
-    } else if (range === "last24h") {
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    } else if (range === "last7d") {
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    } else if (range === "last30d") {
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    } else {
-      start = new Date(0);
-    }
-    return { start, end };
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  function addDays(dateStr, days) {
+    // dateStr = "YYYY-MM-DD", returns new "YYYY-MM-DD"
+    const d = new Date(dateStr + "T00:00:00");
+    d.setDate(d.getDate() + days);
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   }
 
-  function parseTS(ts) { return new Date(ts.replace(" ", "T")); }
+  function getDateRange(range, newestTS) {
+    // Use the newest timestamp as "now" so we stay in sensor time
+    const nowDate = newestTS.substring(0, 10);   // "YYYY-MM-DD"
+    const nowTime = newestTS.substring(11, 19);   // "HH:MM:SS"
+    const endStr  = newestTS;
+
+    if (range === "today") {
+      return { start: nowDate + " 00:00:00", end: endStr };
+    }
+    if (range === "yesterday") {
+      const yd = addDays(nowDate, -1);
+      return { start: yd + " 00:00:00", end: yd + " 23:59:59" };
+    }
+    if (range === "thisweek") {
+      const dow = new Date(nowDate + "T00:00:00").getDay(); // 0=Sun
+      const daysToMon = (dow === 0) ? 6 : dow - 1;
+      return { start: addDays(nowDate, -daysToMon) + " 00:00:00", end: endStr };
+    }
+    if (range === "thismonth") {
+      return { start: nowDate.substring(0, 7) + "-01 00:00:00", end: endStr };
+    }
+    if (range === "thisyear") {
+      return { start: nowDate.substring(0, 4) + "-01-01 00:00:00", end: endStr };
+    }
+    if (range === "last24h") {
+      return { start: addDays(nowDate, -1) + " " + nowTime, end: endStr };
+    }
+    if (range === "last7d") {
+      return { start: addDays(nowDate, -7) + " " + nowTime, end: endStr };
+    }
+    if (range === "last30d") {
+      return { start: addDays(nowDate, -30) + " " + nowTime, end: endStr };
+    }
+    return { start: "0000-00-00 00:00:00", end: endStr };
+  }
 
   function filterByRange(data, range) {
-    const { start, end } = getDateRange(range);
-    return data.filter(r => { const t = parseTS(r.timestamp); return t >= start && t <= end; });
+    if (!data.length) return [];
+    const newest = [...data].sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0].timestamp;
+    const { start, end } = getDateRange(range, newest);
+    return data.filter(r => r.timestamp >= start && r.timestamp <= end);
   }
 
   // ── Rendering ────────────────────────────────────────────────────────────────
@@ -120,7 +138,7 @@
     // Sensor reading lists (last 12 per sensor within range)
     container.innerHTML = "";
     Object.keys(grouped).sort().forEach(sensor => {
-      const readings = grouped[sensor].sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp)).slice(0, 12);
+      const readings = grouped[sensor].sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 12);
       const div = document.createElement("div");
       div.className = "sensor";
       div.innerHTML = `
