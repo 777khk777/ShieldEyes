@@ -152,7 +152,7 @@
               <span>
                 <span class="temp">${Number(r.temperature).toFixed(1)}°C</span>
                 &nbsp;
-                <span class="hum">${r.humidity}%</span>
+                <span class="hum">${Number(r.humidity).toFixed(1)}%</span>
                 ${r.co2 !== null ? `&nbsp;<span class="co2">${r.co2}ppm</span>` : ''}
               </span>
             </div>
@@ -230,12 +230,12 @@
         allData = [];
         rawData.forEach(entry => {
           if (entry.r) {
-            // New compact format: {ts, r: [[sensorNum, temp, hum, co2|null], ...]}
+            // Compact format: {ts, r: [[num,temp,hum] or [0,temp,hum,co2]]}
             entry.r.forEach(r => allData.push({
               sensor:      "Sensor " + r[0],
               temperature: r[1],
               humidity:    r[2],
-              co2:         r[3] !== undefined ? r[3] : null,
+              co2:         r.length === 4 ? r[3] : null,  // only Sensor 0 has 4 elements
               timestamp:   entry.ts
             }));
           } else if (entry.readings) {

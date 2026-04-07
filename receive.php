@@ -2,6 +2,9 @@
 // Allow POST requests from ESP32
 header("Content-Type: application/json");
 
+// Fix PHP float serialization precision (prevents 24.699999... issues)
+ini_set('serialize_precision', 14);
+
 // Read incoming JSON from ESP32
 $raw = file_get_contents("php://input");
 $data = json_decode($raw, true);
@@ -19,7 +22,6 @@ if ($data && isset($data['readings'])) {
 
     $lastSeen = [];
     foreach ($readings as $entry) {
-        // Support both new format (ts/r) and old format (timestamp/readings)
         $t = strtotime(isset($entry['ts']) ? $entry['ts'] : $entry['timestamp']);
         $rows = isset($entry['r']) ? $entry['r'] : $entry['readings'];
         foreach ($rows as $r) {
@@ -39,18 +41,15 @@ if ($data && isset($data['readings'])) {
             "ts" => date("Y-m-d H:i:s"),
             "r"  => array_map(function($r) {
                 $sensorNum = (int) preg_replace('/\D/', '', $r['sensor']);
-                $row = [
-                    $sensorNum,
-                    round((float)$r['temperature'], 1),
-                    round((float)$r['humidity'], 1)
-                ];
-                // CO2: Sensor 0 only, optional field
+                $temp = round((float)$r['temperature'], 1);
+                $hum  = round((float)$r['humidity'], 1);
                 if ($sensorNum === 0 && isset($r['co2'])) {
-                    $row[] = (int)$r['co2'];
+                    // Sensor 0: [num, temp, hum, co2]
+                    return [$sensorNum, $temp, $hum, (int)$r['co2']];
                 } else {
-                    $row[] = null;
+                    // All other sensors: [num, temp, hum]
+                    return [$sensorNum, $temp, $hum];
                 }
-                return $row;
             }, $filtered)
         ];
         array_unshift($readings, $entry);
