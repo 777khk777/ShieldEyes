@@ -8,146 +8,218 @@
   <style>
     body { font-family: sans-serif; max-width: 1000px; margin: 40px auto; padding: 0 20px; background: #f5f5f5; }
     h1 { color: #2c3e50; }
+    #status { color: #27ae60; margin-bottom: 10px; font-size: 0.9em; }
+
+    /* Refresh button */
+    .refresh-btn { background: #2c3e50; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-bottom: 16px; }
+
+    /* Range selector bar */
+    .range-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .range-bar::-webkit-scrollbar { display: none; }
+    .range-btn { flex-shrink: 0; background: white; color: #2c3e50; border: 1.5px solid #ddd; padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85em; white-space: nowrap; transition: all 0.15s; }
+    .range-btn:hover { border-color: #2c3e50; }
+    .range-btn.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+
+    /* Charts */
     .chart-container { position: relative; height: 260px; background: white; border-radius: 10px; padding: 10px; margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    @media (max-width: 600px) { .chart-container { height: 200px; } }
+    @media (max-width: 600px) { .chart-container { height: 220px; } }
+
+    /* Sensor reading lists */
     .sensor { background: white; border-radius: 10px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     .sensor h2 { margin-bottom: 10px; color: #34495e; border-bottom: 2px solid #eee; padding-bottom: 5px; }
     .reading { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 0.9em; }
     .timestamp { color: #888; }
     .temp { color: #e74c3c; font-weight: bold; }
     .hum { color: #3498db; font-weight: bold; }
-    button { background: #2c3e50; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
-    #status { color: #27ae60; margin-bottom: 10px; font-size: 0.9em; }
+    .no-data { color: #999; font-style: italic; padding: 10px 0; }
   </style>
 </head>
 <body>
   <h1>🌡 Namuhaus Sensor Dashboard</h1>
   <div id="status"></div>
-  <button onclick="loadData()">↻ Refresh</button>
+  <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+
+  <!-- Date range selector -->
+  <div class="range-bar" id="rangeBar">
+    <button class="range-btn" data-range="today">Today</button>
+    <button class="range-btn" data-range="yesterday">Yesterday</button>
+    <button class="range-btn" data-range="thisweek">This week</button>
+    <button class="range-btn" data-range="thismonth">This month</button>
+    <button class="range-btn" data-range="thisyear">This year</button>
+    <button class="range-btn" data-range="lasthour">Last hour</button>
+    <button class="range-btn" data-range="last12h">Last 12 hours</button>
+    <button class="range-btn active" data-range="last24h">Last 24 hours</button>
+    <button class="range-btn" data-range="last7d">Last 7 days</button>
+    <button class="range-btn" data-range="last30d">Last 30 days</button>
+  </div>
 
   <div class="chart-container"><canvas id="tempChart"></canvas></div>
   <div class="chart-container"><canvas id="humChart"></canvas></div>
   <div id="readings"></div>
 
 <script>
-function loadData() {
-  document.getElementById("status").textContent = "Loading...";
+  const COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c","#e67e22","#e91e63"];
+  let allData = [];
+  let currentRange = "last24h";
 
-  // Assuming readings.json is in the same folder as this HTML file
-  fetch("readings.json")
-    .then(r => r.json())
-    .then(rawData => {
-      document.getElementById("status").textContent = "Last updated: " + new Date().toLocaleTimeString();
+  // ── Date range helpers ───────────────────────────────────────────────────────
+  function getDateRange(range) {
+    const now = new Date();
+    let start = new Date();
+    let end = new Date();
 
-      // 1. FLATTEN DATA: Your JSON has nested "readings" arrays
-      const data = [];
-      rawData.forEach(entry => {
-        if (entry.readings) {
-          entry.readings.forEach(sensorRead => {
-            data.push({
-              sensor: sensorRead.sensor,
-              temperature: sensorRead.temperature,
-              humidity: sensorRead.humidity,
-              timestamp: entry.timestamp
-            });
-          });
-        } else if (entry.sensor) {
-          data.push(entry); // Handles the flat objects at the end of your file
-        }
-      });
+    switch (range) {
+      case "today":
+        start = new Date(now); start.setHours(0, 0, 0, 0); break;
+      case "yesterday":
+        start = new Date(now); start.setDate(start.getDate() - 1); start.setHours(0, 0, 0, 0);
+        end   = new Date(start); end.setHours(23, 59, 59, 999); break;
+      case "thisweek":
+        start = new Date(now);
+        const dow = start.getDay();
+        start.setDate(start.getDate() - (dow === 0 ? 6 : dow - 1));
+        start.setHours(0, 0, 0, 0); break;
+      case "thismonth":
+        start = new Date(now.getFullYear(), now.getMonth(), 1); break;
+      case "thisyear":
+        start = new Date(now.getFullYear(), 0, 1); break;
+      case "lasthour":
+        start = new Date(now - 60 * 60 * 1000); break;
+      case "last12h":
+        start = new Date(now - 12 * 60 * 60 * 1000); break;
+      case "last24h":
+        start = new Date(now - 24 * 60 * 60 * 1000); break;
+      case "last7d":
+        start = new Date(now - 7 * 24 * 60 * 60 * 1000); break;
+      case "last30d":
+        start = new Date(now - 30 * 24 * 60 * 60 * 1000); break;
+    }
+    return { start, end };
+  }
 
-      const container = document.getElementById("readings");
-      if (!data.length) {
-        container.innerHTML = "<p>No readings yet.</p>";
-        return;
-      }
+  function parseTS(ts) { return new Date(ts.replace(" ", "T")); }
 
-      // 2. GROUP BY SENSOR
-      const grouped = {};
-      data.forEach(r => {
-        if (!grouped[r.sensor]) grouped[r.sensor] = [];
-        grouped[r.sensor].push(r);
-      });
+  function filterByRange(data, range) {
+    const { start, end } = getDateRange(range);
+    return data.filter(r => { const t = parseTS(r.timestamp); return t >= start && t <= end; });
+  }
 
-      container.innerHTML = "";
+  // ── Rendering ────────────────────────────────────────────────────────────────
+  function renderDashboard(range) {
+    const data = filterByRange(allData, range);
+    const container = document.getElementById("readings");
 
-      // 3. RENDER UI LISTS
-      Object.keys(grouped).forEach(sensor => {
-        const readings = grouped[sensor].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 12);
-        const div = document.createElement("div");
-        div.className = "sensor";
-        div.innerHTML = `
-          <h2>${sensor}</h2>
-          <div>
-            ${readings.map(r => `
-              <div class="reading">
-                <span class="timestamp">${r.timestamp}</span>
-                <span>
-                  <span class="temp">${Number(r.temperature).toFixed(1)}°C</span>
-                  &nbsp;
-                  <span class="hum">${r.humidity}%</span>
-                </span>
-              </div>
-            `).join("")}
-          </div>
-        `;
-        container.appendChild(div);
-      });
-
-      // 4. PREPARE CHART DATA
-      const allTimestamps = [...new Set(data.map(r => r.timestamp))].sort().slice(-12);
-      const colors = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c","#e67e22","#e91e63"];
-      const tempDatasets = [];
-      const humDatasets = [];
-
-      Object.keys(grouped).forEach((sensor, i) => {
-        const sensorData = grouped[sensor];
-        
-        // Map data points to their specific timestamps
-        const tData = allTimestamps.map(t => {
-            const found = sensorData.find(sd => sd.timestamp === t);
-            return found ? found.temperature : null;
-        });
-        const hData = allTimestamps.map(t => {
-            const found = sensorData.find(sd => sd.timestamp === t);
-            return found ? found.humidity : null;
-        });
-
-        tempDatasets.push({ label: sensor, data: tData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
-        humDatasets.push({ label: sensor, data: hData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
-      });
-
+    if (!data.length) {
+      container.innerHTML = "<p class='no-data'>No readings in this time range.</p>";
       if (window.tempChart instanceof Chart) window.tempChart.destroy();
       if (window.humChart instanceof Chart) window.humChart.destroy();
+      return;
+    }
 
-      window.tempChart = new Chart(document.getElementById("tempChart"), {
-        type: "line",
-        data: { labels: allTimestamps, datasets: tempDatasets },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { title: { display: true, text: "Temperature (°C)" } },
-          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 }, callback: function(val) { const l = this.getLabelForValue(val); return l ? l.substring(11, 16) : ''; } } } }
-        }
-      });
-
-      window.humChart = new Chart(document.getElementById("humChart"), {
-        type: "line",
-        data: { labels: allTimestamps, datasets: humDatasets },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { title: { display: true, text: "Humidity (%)" } },
-          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 }, callback: function(val) { const l = this.getLabelForValue(val); return l ? l.substring(11, 16) : ''; } } } }
-        }
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("status").textContent = "Error loading local readings.json.";
+    // Group by sensor
+    const grouped = {};
+    data.forEach(r => {
+      if (!grouped[r.sensor]) grouped[r.sensor] = [];
+      grouped[r.sensor].push(r);
     });
-}
 
-loadData();
-setInterval(loadData, 30000);
+    // Sensor reading lists (last 12 per sensor within range)
+    container.innerHTML = "";
+    Object.keys(grouped).sort().forEach(sensor => {
+      const readings = grouped[sensor].sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp)).slice(0, 12);
+      const div = document.createElement("div");
+      div.className = "sensor";
+      div.innerHTML = `
+        <h2>${sensor}</h2>
+        <div>
+          ${readings.map(r => `
+            <div class="reading">
+              <span class="timestamp">${r.timestamp}</span>
+              <span>
+                <span class="temp">${Number(r.temperature).toFixed(1)}°C</span>
+                &nbsp;
+                <span class="hum">${r.humidity}%</span>
+              </span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    // Chart data — all timestamps in range
+    const allTimestamps = [...new Set(data.map(r => r.timestamp))].sort();
+    const tempDatasets = [], humDatasets = [];
+
+    Object.keys(grouped).sort().forEach((sensor, i) => {
+      const sd = grouped[sensor];
+      const tData = allTimestamps.map(t => { const f = sd.find(x => x.timestamp === t); return f ? Number(f.temperature) : null; });
+      const hData = allTimestamps.map(t => { const f = sd.find(x => x.timestamp === t); return f ? Number(f.humidity)    : null; });
+      const color = COLORS[i % COLORS.length];
+      tempDatasets.push({ label: sensor, data: tData, borderColor: color, borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
+      humDatasets.push({ label: sensor, data: hData, borderColor: color, borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
+    });
+
+    // X-axis label: show HH:MM, or "MM-DD HH:MM" when range spans multiple days
+    const multiDay = ["thisweek","thismonth","thisyear","last7d","last30d"].includes(range);
+    const tickFmt = function(val) {
+      const l = this.getLabelForValue(val);
+      if (!l) return '';
+      return multiDay ? l.substring(5, 16).replace(" ", "\n") : l.substring(11, 16);
+    };
+    const chartOpts = {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 }, callback: tickFmt } } }
+    };
+
+    if (window.tempChart instanceof Chart) window.tempChart.destroy();
+    if (window.humChart instanceof Chart) window.humChart.destroy();
+
+    window.tempChart = new Chart(document.getElementById("tempChart"), {
+      type: "line", data: { labels: allTimestamps, datasets: tempDatasets },
+      options: { ...chartOpts, plugins: { title: { display: true, text: "Temperature (°C)" } }, scales: { ...chartOpts.scales } }
+    });
+    window.humChart = new Chart(document.getElementById("humChart"), {
+      type: "line", data: { labels: allTimestamps, datasets: humDatasets },
+      options: { ...chartOpts, plugins: { title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
+    });
+  }
+
+  // ── Data loading ─────────────────────────────────────────────────────────────
+  function loadData() {
+    document.getElementById("status").textContent = "Loading...";
+    fetch("readings.json")
+      .then(r => r.json())
+      .then(rawData => {
+        document.getElementById("status").textContent = "Last updated: " + new Date().toLocaleTimeString();
+        allData = [];
+        rawData.forEach(entry => {
+          if (entry.readings) {
+            entry.readings.forEach(sr => allData.push({ sensor: sr.sensor, temperature: sr.temperature, humidity: sr.humidity, timestamp: entry.timestamp }));
+          } else if (entry.sensor) {
+            allData.push(entry);
+          }
+        });
+        renderDashboard(currentRange);
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("status").textContent = "Error loading readings.json.";
+      });
+  }
+
+  // ── Range button clicks ───────────────────────────────────────────────────────
+  document.getElementById("rangeBar").addEventListener("click", e => {
+    const btn = e.target.closest(".range-btn");
+    if (!btn) return;
+    document.querySelectorAll(".range-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentRange = btn.dataset.range;
+    renderDashboard(currentRange);
+  });
+
+  loadData();
+  setInterval(loadData, 30000);
 </script>
 </body>
 </html>
