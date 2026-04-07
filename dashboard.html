@@ -95,8 +95,8 @@ function loadData() {
       });
 
       // 4. PREPARE CHART DATA
-      const allTimestamps = [...new Set(data.map(r => r.timestamp))].sort();
-      const colors = ["red", "blue", "green", "orange", "purple"];
+      const allTimestamps = [...new Set(data.map(r => r.timestamp))].sort().slice(-12);
+      const colors = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c","#e67e22","#e91e63"];
       const tempDatasets = [];
       const humDatasets = [];
 
@@ -113,8 +113,8 @@ function loadData() {
             return found ? found.humidity : null;
         });
 
-        tempDatasets.push({ label: sensor, data: tData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 4, fill: false, spanGaps: true });
-        humDatasets.push({ label: sensor, data: hData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 4, fill: false, spanGaps: true });
+        tempDatasets.push({ label: sensor, data: tData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
+        humDatasets.push({ label: sensor, data: hData, borderColor: colors[i % colors.length], borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true });
       });
 
       if (window.tempChart instanceof Chart) window.tempChart.destroy();
@@ -126,7 +126,7 @@ function loadData() {
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { title: { display: true, text: "Temperature (°C)" } },
-          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 } } } }
+          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 }, callback: function(val) { const l = this.getLabelForValue(val); return l ? l.substring(11, 16) : ''; } } } }
         }
       });
 
@@ -136,7 +136,7 @@ function loadData() {
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { title: { display: true, text: "Humidity (%)" } },
-          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 } } } }
+          scales: { x: { ticks: { maxTicksLimit: 6, maxRotation: 45, autoSkip: true, font: { size: 11 }, callback: function(val) { const l = this.getLabelForValue(val); return l ? l.substring(11, 16) : ''; } } } }
         }
       });
     })
