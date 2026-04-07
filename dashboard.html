@@ -46,8 +46,6 @@
     <button class="range-btn" data-range="thisweek">This week</button>
     <button class="range-btn" data-range="thismonth">This month</button>
     <button class="range-btn" data-range="thisyear">This year</button>
-    <button class="range-btn" data-range="lasthour">Last hour</button>
-    <button class="range-btn" data-range="last12h">Last 12 hours</button>
     <button class="range-btn active" data-range="last24h">Last 24 hours</button>
     <button class="range-btn" data-range="last7d">Last 7 days</button>
     <button class="range-btn" data-range="last30d">Last 30 days</button>
@@ -65,34 +63,30 @@
   // ── Date range helpers ───────────────────────────────────────────────────────
   function getDateRange(range) {
     const now = new Date();
-    let start = new Date();
-    let end = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let start, end = new Date();
 
-    switch (range) {
-      case "today":
-        start = new Date(now); start.setHours(0, 0, 0, 0); break;
-      case "yesterday":
-        start = new Date(now); start.setDate(start.getDate() - 1); start.setHours(0, 0, 0, 0);
-        end   = new Date(start); end.setHours(23, 59, 59, 999); break;
-      case "thisweek":
-        start = new Date(now);
-        const dow = start.getDay();
-        start.setDate(start.getDate() - (dow === 0 ? 6 : dow - 1));
-        start.setHours(0, 0, 0, 0); break;
-      case "thismonth":
-        start = new Date(now.getFullYear(), now.getMonth(), 1); break;
-      case "thisyear":
-        start = new Date(now.getFullYear(), 0, 1); break;
-      case "lasthour":
-        start = new Date(now - 60 * 60 * 1000); break;
-      case "last12h":
-        start = new Date(now - 12 * 60 * 60 * 1000); break;
-      case "last24h":
-        start = new Date(now - 24 * 60 * 60 * 1000); break;
-      case "last7d":
-        start = new Date(now - 7 * 24 * 60 * 60 * 1000); break;
-      case "last30d":
-        start = new Date(now - 30 * 24 * 60 * 60 * 1000); break;
+    if (range === "today") {
+      start = todayStart;
+    } else if (range === "yesterday") {
+      start = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
+      end   = new Date(todayStart.getTime() - 1);
+    } else if (range === "thisweek") {
+      const dow = now.getDay();
+      const daysToMon = (dow === 0) ? 6 : dow - 1;
+      start = new Date(todayStart.getTime() - daysToMon * 24 * 60 * 60 * 1000);
+    } else if (range === "thismonth") {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (range === "thisyear") {
+      start = new Date(now.getFullYear(), 0, 1);
+    } else if (range === "last24h") {
+      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    } else if (range === "last7d") {
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === "last30d") {
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else {
+      start = new Date(0);
     }
     return { start, end };
   }
