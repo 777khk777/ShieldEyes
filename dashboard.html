@@ -31,6 +31,7 @@
     .timestamp { color: #888; }
     .temp { color: #e74c3c; font-weight: bold; }
     .hum { color: #3498db; font-weight: bold; }
+    .co2 { color: #00bcd4; font-weight: bold; }
     .no-data { color: #999; font-style: italic; padding: 10px 0; }
   </style>
 </head>
@@ -53,6 +54,7 @@
 
   <div class="chart-container"><canvas id="tempChart"></canvas></div>
   <div class="chart-container"><canvas id="humChart"></canvas></div>
+  <div class="chart-container" id="co2ChartWrap" style="display:none"><canvas id="co2Chart"></canvas></div>
   <div id="readings"></div>
 
 <script>
@@ -151,6 +153,7 @@
                 <span class="temp">${Number(r.temperature).toFixed(1)}°C</span>
                 &nbsp;
                 <span class="hum">${r.humidity}%</span>
+                ${r.co2 !== null ? `&nbsp;<span class="co2">${r.co2}ppm</span>` : ''}
               </span>
             </div>
           `).join("")}
@@ -186,6 +189,7 @@
 
     if (window.tempChart instanceof Chart) window.tempChart.destroy();
     if (window.humChart instanceof Chart) window.humChart.destroy();
+    if (window.co2Chart  instanceof Chart) window.co2Chart.destroy();
 
     window.tempChart = new Chart(document.getElementById("tempChart"), {
       type: "line", data: { labels: allTimestamps, datasets: tempDatasets },
@@ -195,6 +199,25 @@
       type: "line", data: { labels: allTimestamps, datasets: humDatasets },
       options: { ...chartOpts, plugins: { title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
     });
+
+    // CO2 chart — only shown when Sensor 0 data exists
+    const co2Readings = data.filter(r => r.co2 !== null);
+    const co2Wrap = document.getElementById("co2ChartWrap");
+    if (co2Readings.length) {
+      co2Wrap.style.display = "block";
+      const co2TS = [...new Set(co2Readings.map(r => r.timestamp))].sort();
+      const co2Dataset = [{
+        label: "Sensor 0 (CO₂)",
+        data: co2TS.map(t => { const f = co2Readings.find(x => x.timestamp === t); return f ? f.co2 : null; }),
+        borderColor: "#00bcd4", borderWidth: 2.5, pointRadius: 2, fill: false, spanGaps: true
+      }];
+      window.co2Chart = new Chart(document.getElementById("co2Chart"), {
+        type: "line", data: { labels: co2TS, datasets: co2Dataset },
+        options: { ...chartOpts, plugins: { title: { display: true, text: "CO₂ (ppm)" } }, scales: { ...chartOpts.scales } }
+      });
+    } else {
+      co2Wrap.style.display = "none";
+    }
   }
 
   // ── Data loading ─────────────────────────────────────────────────────────────
@@ -206,10 +229,21 @@
         document.getElementById("status").textContent = "Last updated: " + new Date().toLocaleTimeString();
         allData = [];
         rawData.forEach(entry => {
-          if (entry.readings) {
-            entry.readings.forEach(sr => allData.push({ sensor: sr.sensor, temperature: sr.temperature, humidity: sr.humidity, timestamp: entry.timestamp }));
-          } else if (entry.sensor) {
-            allData.push(entry);
+          if (entry.r) {
+            // New compact format: {ts, r: [[sensorNum, temp, hum, co2|null], ...]}
+            entry.r.forEach(r => allData.push({
+              sensor:      "Sensor " + r[0],
+              temperature: r[1],
+              humidity:    r[2],
+              co2:         r[3] !== undefined ? r[3] : null,
+              timestamp:   entry.ts
+            }));
+          } else if (entry.readings) {
+            // Old format fallback
+            entry.readings.forEach(sr => allData.push({
+              sensor: sr.sensor, temperature: sr.temperature,
+              humidity: sr.humidity, co2: null, timestamp: entry.timestamp
+            }));
           }
         });
         renderDashboard(currentRange);

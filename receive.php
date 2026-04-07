@@ -19,9 +19,11 @@ if ($data && isset($data['readings'])) {
 
     $lastSeen = [];
     foreach ($readings as $entry) {
-        $t = strtotime($entry['timestamp']);
-        foreach ($entry['readings'] as $r) {
-            $id = $r['sensor'];
+        // Support both new format (ts/r) and old format (timestamp/readings)
+        $t = strtotime(isset($entry['ts']) ? $entry['ts'] : $entry['timestamp']);
+        $rows = isset($entry['r']) ? $entry['r'] : $entry['readings'];
+        foreach ($rows as $r) {
+            $id = isset($entry['r']) ? ("Sensor " . $r[0]) : $r['sensor'];
             if (!isset($lastSeen[$id]) || $t > $lastSeen[$id]) {
                 $lastSeen[$id] = $t;
             }
@@ -34,12 +36,26 @@ if ($data && isset($data['readings'])) {
 
     if (!empty($filtered)) {
         $entry = [
-            "readings"  => $filtered,
-            "timestamp" => date("Y-m-d H:i:s")
+            "ts" => date("Y-m-d H:i:s"),
+            "r"  => array_map(function($r) {
+                $sensorNum = (int) preg_replace('/\D/', '', $r['sensor']);
+                $row = [
+                    $sensorNum,
+                    round((float)$r['temperature'], 1),
+                    round((float)$r['humidity'], 1)
+                ];
+                // CO2: Sensor 0 only, optional field
+                if ($sensorNum === 0 && isset($r['co2'])) {
+                    $row[] = (int)$r['co2'];
+                } else {
+                    $row[] = null;
+                }
+                return $row;
+            }, $filtered)
         ];
         array_unshift($readings, $entry);
         $readings = array_slice($readings, 0, 20000);
-        file_put_contents($file, json_encode($readings));
+        file_put_contents($file, json_encode($readings, JSON_UNESCAPED_UNICODE));
     }
 
     echo json_encode(["status" => "ok"]);
