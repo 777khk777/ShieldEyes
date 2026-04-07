@@ -38,7 +38,7 @@ if ($data && isset($data['readings'])) {
             "timestamp" => date("Y-m-d H:i:s")
         ];
         array_unshift($readings, $entry);
-        $readings = array_slice($readings, 0, 100);
+        $readings = array_slice($readings, 0, 20000);
         file_put_contents($file, json_encode($readings));
     }
 
