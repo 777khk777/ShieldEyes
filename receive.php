@@ -42,7 +42,7 @@ if ($data && isset($data['readings'])) {
             "r"  => array_map(function($r) {
                 $sensorNum = (int) preg_replace('/\D/', '', $r['sensor']);
                 $temp = round((float)$r['temperature'], 1);
-                $hum  = round((float)$r['humidity'], 1);
+                $hum  = (int) round((float)$r['humidity']);
                 if ($sensorNum === 0 && isset($r['co2'])) {
                     // Sensor 0: [num, temp, hum, co2]
                     return [$sensorNum, $temp, $hum, (int)$r['co2']];

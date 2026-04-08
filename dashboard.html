@@ -152,7 +152,7 @@
               <span>
                 <span class="temp">${Number(r.temperature).toFixed(1)}°C</span>
                 &nbsp;
-                <span class="hum">${Number(r.humidity).toFixed(1)}%</span>
+                <span class="hum">${r.humidity}%</span>
                 ${r.co2 !== null ? `&nbsp;<span class="co2">${r.co2}ppm</span>` : ''}
               </span>
             </div>
