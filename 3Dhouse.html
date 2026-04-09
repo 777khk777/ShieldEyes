@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShieldEyes — 3D Sensor Map</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { display: flex; height: 100vh; overflow: hidden; font-family: Arial, sans-serif; background: #1a1a2e; color: #e0e0e0; }
+
+    /* ── Left Panel ── */
+    #panel {
+      width: 300px;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      background: #16213e;
+      border-right: 2px solid #0f3460;
+      overflow-y: auto;
+    }
+
+    #panel h1 {
+      padding: 14px 16px;
+      font-size: 1rem;
+      border-bottom: 1px solid #0f3460;
+      color: #e94560;
+      letter-spacing: 0.03em;
+    }
+
+    #status-bar {
+      padding: 9px 16px;
+      background: #0f3460;
+      font-size: 0.82rem;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      padding: 7px 10px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #778;
+      background: #111a36;
+      text-align: left;
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid #1e2a4a;
+    }
+
+    tbody tr:hover { background: #1e2d6e; }
+
+    tbody tr.active {
+      background: #0f3460;
+      box-shadow: inset 3px 0 0 #e94560;
+    }
+
+    #row-door:hover { background: #2e2800 !important; }
+    #row-door.active {
+      background: #3a3000 !important;
+      box-shadow: inset 3px 0 0 #f5a500;
+    }
+
+    td { padding: 6px 10px; font-size: 0.83rem; vertical-align: middle; }
+
+    td.num-cell { width: 24px; font-weight: bold; color: #aaa; }
+    td.dot-cell { width: 18px; padding-right: 4px; }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid #333;
+    }
+
+    input[type=text] {
+      background: transparent;
+      border: 1px solid #2a3560;
+      color: #e0e0e0;
+      padding: 4px 7px;
+      border-radius: 4px;
+      width: 100%;
+      font-size: 0.79rem;
+    }
+
+    input[type=text]:focus {
+      outline: none;
+      border-color: #e94560;
+      background: #0d1a3a;
+    }
+
+    #btn-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid #0f3460;
+      margin-top: auto;
+    }
+
+    button {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: bold;
+      transition: background 0.15s;
+    }
+
+    #btn-save { background: #e94560; color: white; }
+    #btn-save:hover { background: #c73652; }
+    #btn-clear { background: #2a3560; color: #ccc; }
+    #btn-clear:hover { background: #3a4570; }
+
+    #save-msg {
+      padding: 5px 16px 10px;
+      font-size: 0.75rem;
+      min-height: 22px;
+      color: #4caf50;
+    }
+
+    /* ── Right Panel ── */
+    #canvas-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    #canvas-wrap canvas { display: block; }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #999;
+      font-size: 0.72rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      line-height: 1.7;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Left Panel ── -->
+<div id="panel">
+  <h1>ShieldEyes — Sensor Map</h1>
+  <div id="status-bar">Click a sensor row to start placing</div>
+
+  <!-- Main Door landmark — outside the table so layout can never hide it -->
+  <div id="row-door" data-sensor="door"
+       style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+              cursor:pointer;border-bottom:2px solid #0f3460;
+              background:#1e1a00;">
+    <span class="dot" id="dot-door" style="flex-shrink:0;"></span>
+    <span style="font-size:1.15rem;">🚪</span>
+    <span style="color:#f5a500;font-weight:bold;font-size:0.88rem;letter-spacing:0.02em;">Main Door</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>#</th>
+        <th>Name / Location</th>
+      </tr>
+    </thead>
+    <tbody id="sensor-table"></tbody>
+  </table>
+
+  <div id="btn-row">
+    <button id="btn-save">Save</button>
+    <button id="btn-clear">Clear All</button>
+  </div>
+  <div id="save-msg"></div>
+</div>
+
+<!-- ── 3D Canvas ── -->
+<div id="canvas-wrap">
+  <div id="hint">
+    Drag to orbit &nbsp;|&nbsp; Scroll to zoom<br>
+    Select a sensor, then click the house to place its pin
+  </div>
+</div>
+
+<!-- Three.js via importmap -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const NUM_SENSORS = 10;
+const COLORS = [
+  '#e94560', '#00b4d8', '#06d6a0', '#ffd166', '#a855f7',
+  '#ff6b35', '#4cc9f0', '#f72585', '#80b918', '#fb8500'
+];
+const DOOR_COLOR = '#f5a500'; // amber/gold — distinct from all sensor colours
+
+// ── State ────────────────────────────────────────────────────────────────────
+let activeSensor = null;
+const sensors = {}; // { 1: { name, position, pinGroup }, ... }
+
+// ── Renderer ─────────────────────────────────────────────────────────────────
+const wrap = document.getElementById('canvas-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+wrap.appendChild(renderer.domElement);
+
+// ── Scene & Camera ───────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+scene.fog = new THREE.Fog(0x1a1a2e, 25, 60);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(6, 5, 7);
+
+// ── OrbitControls ────────────────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.5, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 3;
+controls.maxDistance = 22;
+controls.maxPolarAngle = Math.PI / 2 - 0.04;
+controls.update();
+
+// ── Lighting ─────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+scene.add(new THREE.HemisphereLight(0x87ceeb, 0x3a6e3a, 0.35));
+
+const sun = new THREE.DirectionalLight(0xfff5e0, 1.1);
+sun.position.set(8, 14, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.5;
+sun.shadow.camera.far = 50;
+sun.shadow.camera.left = -8;
+sun.shadow.camera.right = 8;
+sun.shadow.camera.top = 8;
+sun.shadow.camera.bottom = -8;
+scene.add(sun);
+
+// ── Ground ───────────────────────────────────────────────────────────────────
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(22, 22),
+  new THREE.MeshLambertMaterial({ color: 0x4a7c4e })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -1;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ── House Body ───────────────────────────────────────────────────────────────
+// Body: 4 wide × 2 tall × 3 deep, centered at origin (y: -1 to +1)
+const body = new THREE.Mesh(
+  new THREE.BoxGeometry(4, 2, 3),
+  new THREE.MeshLambertMaterial({ color: 0xe8e0d0 })
+);
+body.castShadow = true;
+body.receiveShadow = true;
+body.userData.isHouse = true;
+scene.add(body);
+
+// ── Roof (gabled triangular prism) ───────────────────────────────────────────
+// House body: 4 wide (X) × 3 deep (Z). Shorter sides face ±X (3 units wide).
+// Gable ends go on those shorter X-facing walls → ridge runs along X.
+// Slopes pitch front/back (±Z direction).
+function buildRoofGeometry() {
+  const hw = 2.1, hd = 1.6; // half-length along X (with overhang), half-depth along Z (with overhang)
+  const base = 0, peak = 1;  // local Y (group placed at y=1)
+
+  // Each face has its own vertex copies so computeVertexNormals works correctly.
+  const verts = new Float32Array([
+    // Left gable end (x = -hw) — winding order gives outward normal (-X)
+    -hw, peak,  0,    -hw, base, -hd,   -hw, base, +hd,
+    // Right gable end (x = +hw) — outward normal (+X)
+    +hw, peak,  0,    +hw, base, +hd,   +hw, base, -hd,
+    // Front slope (z = +hd) — two triangles
+    -hw, base, +hd,   +hw, base, +hd,   +hw, peak,  0,
+    -hw, base, +hd,   +hw, peak,  0,    -hw, peak,  0,
+    // Back slope (z = -hd)
+    -hw, base, -hd,   -hw, peak,  0,    +hw, peak,  0,
+    -hw, base, -hd,   +hw, peak,  0,    +hw, base, -hd,
+  ]);
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+const roof = new THREE.Mesh(
+  buildRoofGeometry(),
+  new THREE.MeshLambertMaterial({ color: 0x7a5c3a })
+);
+roof.position.y = 1;
+roof.castShadow = true;
+roof.userData.isHouse = true;
+scene.add(roof);
+
+// ── Sprite helper ─────────────────────────────────────────────────────────────
+function makeSprite(text, hexColor, scale = 0.6) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 128, 128);
+  ctx.fillStyle = hexColor;
+  ctx.font = 'bold 72px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 64, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(scale, scale, 1);
+  return sprite;
+}
+
+// ── 3D North Compass ──────────────────────────────────────────────────────────
+// 4-pointed compass rose lying flat on the ground. Drag it to orient North.
+// +Z = North in this scene.
+let compassDiscMat; // module-level so hover handler can toggle emissive
+
+function buildNorthCompass() {
+  const group = new THREE.Group();
+
+  compassDiscMat = new THREE.MeshPhongMaterial({ color: 0x1a1a3a, specular: 0x5555aa, shininess: 70 });
+
+  // Small hub disc at center (hit target for drag)
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.05, 32), compassDiscMat);
+  disc.position.y = 0.025;
+  group.add(disc);
+
+  // Helper: build one flat diamond arm pointing along +Z, lying in XZ plane.
+  // Each arm gets its own Y so no two arms are ever coplanar — eliminates z-fighting.
+  function makeArm(color, y) {
+    const outerR   = 1.3;
+    const innerR   = 0.18;
+    const shoulder = 0.24;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+       0,        y,  outerR,   -shoulder, y, 0,   0,        y, -innerR,  // left triangle
+       0,        y,  outerR,    0,        y, -innerR,   shoulder, y, 0,  // right triangle
+    ]), 3));
+    geo.computeVertexNormals();
+    return new THREE.Mesh(geo,
+      new THREE.MeshPhongMaterial({ color, specular: 0xffffff, shininess: 80, side: THREE.DoubleSide }));
+  }
+
+  // Each arm at a unique Y (0.003 steps — imperceptible but ends z-fighting)
+  const nArm = makeArm(0xff2020, 0.056);                           // North, +Z, red
+  group.add(nArm);
+
+  const sArm = makeArm(0xddddee, 0.059); sArm.rotation.y = Math.PI;       // South, -Z
+  group.add(sArm);
+
+  const eArm = makeArm(0xddddee, 0.062); eArm.rotation.y = -Math.PI / 2;  // East, +X
+  group.add(eArm);
+
+  const wArm = makeArm(0xddddee, 0.065); wArm.rotation.y =  Math.PI / 2;  // West, -X
+  group.add(wArm);
+
+  // Cardinal labels
+  const nLabel = makeSprite('N', '#ff5555', 0.55);
+  nLabel.position.set(0, 0.7, 1.45);
+  group.add(nLabel);
+
+  const sLabel = makeSprite('S', '#aabbcc', 0.45);
+  sLabel.position.set(0, 0.55, -1.45);
+  group.add(sLabel);
+
+  const eLabel = makeSprite('E', '#aabbcc', 0.45);
+  eLabel.position.set(1.45, 0.55, 0);
+  group.add(eLabel);
+
+  const wLabel = makeSprite('W', '#aabbcc', 0.45);
+  wLabel.position.set(-1.45, 0.55, 0);
+  group.add(wLabel);
+
+  // Rotation hint
+  const hint = makeSprite('↻', '#8888aa', 0.35);
+  hint.position.set(0, 0.25, 0);
+  group.add(hint);
+
+  // All solid meshes are hittable for drag (sprites excluded)
+  return { group, parts: [disc, nArm, sArm, eArm, wArm] };
+}
+
+const { group: compassGroup, parts: compassParts } = buildNorthCompass();
+compassGroup.position.set(-6, -1, 0); // on ground, left side of house
+scene.add(compassGroup);
+
+// ── Raycasting ────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const pointer   = new THREE.Vector2();
+const houseParts = [body, roof];
+
+let pointerDownAt = { x: 0, y: 0 };
+let wasDrag = false;
+
+// ── Compass drag state ────────────────────────────────────────────────────────
+let isDraggingCompass       = false;
+let compassDragStartAngle   = 0;
+let compassDragStartRotation = 0;
+let compassHovered          = false;
+
+// Projects compass group center to 2D canvas coordinates
+function compassScreenPos(rect) {
+  const v = compassGroup.position.clone().project(camera);
+  return {
+    x: (v.x + 1) / 2 * rect.width  + rect.left,
+    y: (1 - (v.y + 1) / 2) * rect.height + rect.top
+  };
+}
+
+renderer.domElement.addEventListener('pointerdown', e => {
+  pointerDownAt = { x: e.clientX, y: e.clientY };
+  wasDrag = false;
+
+  // ── Compass drag intercept ──
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+  pointer.y = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  if (raycaster.intersectObjects(compassParts).length > 0) {
+    isDraggingCompass = true;
+    controls.enabled  = false;                           // prevent camera orbit during drag
+    renderer.domElement.setPointerCapture(e.pointerId); // keep events even if cursor leaves canvas
+    const cx = compassScreenPos(rect);
+    compassDragStartAngle    = Math.atan2(e.clientY - cx.y, e.clientX - cx.x);
+    compassDragStartRotation = compassGroup.rotation.y;
+    wrap.style.cursor = 'grabbing';
+  }
+});
+
+renderer.domElement.addEventListener('pointermove', e => {
+  const dx = e.clientX - pointerDownAt.x;
+  const dy = e.clientY - pointerDownAt.y;
+  if (Math.hypot(dx, dy) > 5) wasDrag = true;
+
+  // ── Compass drag rotation ──
+  if (isDraggingCompass) {
+    const rect  = renderer.domElement.getBoundingClientRect();
+    const cx    = compassScreenPos(rect);
+    const angle = Math.atan2(e.clientY - cx.y, e.clientX - cx.x);
+    compassGroup.rotation.y = compassDragStartRotation + (angle - compassDragStartAngle);
+    return; // skip hover logic while dragging
+  }
+
+  // ── Compass hover highlight ──
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+  pointer.y = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const overCompass = raycaster.intersectObjects(compassParts).length > 0;
+  if (overCompass && !compassHovered) {
+    compassHovered = true;
+    compassDiscMat.emissive.setHex(0x222266);
+    wrap.style.cursor = 'grab';
+  } else if (!overCompass && compassHovered) {
+    compassHovered = false;
+    compassDiscMat.emissive.setHex(0x000000);
+    wrap.style.cursor = '';
+  }
+});
+
+renderer.domElement.addEventListener('pointerup', e => {
+  // ── End compass drag ──
+  if (isDraggingCompass) {
+    isDraggingCompass = false;
+    controls.enabled  = true;
+    wrap.style.cursor = compassHovered ? 'grab' : '';
+    return;
+  }
+
+  // ── Pin placement (unchanged) ──
+  if (wasDrag || activeSensor === null) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+  pointer.y = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
+
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(houseParts);
+  if (hits.length > 0) {
+    const hit = hits[0];
+    const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
+    placePin(activeSensor, hit.point.clone(), worldNormal);
+  }
+});
+
+// ── Door marker (canvas-drawn door — flat plane flush with wall) ──────────────
+function makeDoorMarker(faceNormal) {
+  const W = 80, H = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Frame (dark wood)
+  ctx.fillStyle = '#6b3d00';
+  ctx.fillRect(0, 0, W, H);
+
+  // Door panel (amber)
+  ctx.fillStyle = '#f0a030';
+  ctx.fillRect(7, 7, W - 14, H - 14);
+
+  // Top-left inset panel
+  ctx.fillStyle = '#c07a10';
+  ctx.fillRect(12, 12, 24, 38);
+  // Top-right inset panel
+  ctx.fillRect(44, 12, 24, 38);
+  // Lower inset panel (tall)
+  ctx.fillRect(12, 58, W - 24, 54);
+
+  // Doorknob (brass)
+  ctx.fillStyle = '#ffe066';
+  ctx.beginPath();
+  ctx.arc(54, 72, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#a07000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  // PlaneGeometry faces +Z by default; MeshBasicMaterial so lighting doesn't distort colors
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.72), mat);
+
+  // Rotate plane so its +Z normal aligns with the wall's face normal
+  const defaultNormal = new THREE.Vector3(0, 0, 1);
+  const n = faceNormal ? faceNormal.clone().normalize() : defaultNormal;
+  const q = new THREE.Quaternion().setFromUnitVectors(defaultNormal, n);
+  mesh.quaternion.copy(q);
+
+  return mesh;
+}
+
+// ── Pin Management ────────────────────────────────────────────────────────────
+function placePin(num, hitPoint, faceNormal) {
+  const data = sensors[num];
+
+  // Remove old marker
+  if (data.pinGroup) {
+    scene.remove(data.pinGroup);
+    data.pinGroup = null;
+  }
+
+  const isDoor = (num === 'door');
+  const group  = new THREE.Group();
+
+  if (isDoor) {
+    // Flat door plane flush against the wall surface
+    const n = faceNormal ? faceNormal.clone().normalize() : new THREE.Vector3(0, 0, 1);
+    group.add(makeDoorMarker(n));
+    // Offset slightly away from the surface to avoid z-fighting
+    group.position.copy(hitPoint).addScaledVector(n, 0.02);
+    // Store normal for save/restore
+    data.normal = { x: +n.x.toFixed(4), y: +n.y.toFixed(4), z: +n.z.toFixed(4) };
+  } else {
+    const color = COLORS[(num - 1) % COLORS.length];
+
+    // Sphere head
+    group.add(new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 16, 16),
+      new THREE.MeshLambertMaterial({ color })
+    ));
+
+    // Stem
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.018, 0.018, 0.28, 8),
+      new THREE.MeshLambertMaterial({ color })
+    );
+    stem.position.y = -0.18;
+    group.add(stem);
+
+    // Label
+    const label = makeSprite(`S${num}`, color, 0.55);
+    label.position.y = 0.28;
+    group.add(label);
+
+    group.position.copy(hitPoint);
+    group.position.y += 0.09;
+  }
+
+  scene.add(group);
+  data.pinGroup = group;
+  data.position  = {
+    x: +hitPoint.x.toFixed(3),
+    y: +hitPoint.y.toFixed(3),
+    z: +hitPoint.z.toFixed(3)
+  };
+
+  updateTableRow(num);
+}
+
+function removePin(num) {
+  if (sensors[num].pinGroup) {
+    scene.remove(sensors[num].pinGroup);
+    sensors[num].pinGroup = null;
+    sensors[num].position  = null;
+  }
+  updateTableRow(num);
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function buildTable() {
+  const tbody = document.getElementById('sensor-table');
+
+  // Door row is already in static HTML — just init state & wire click
+  sensors['door'] = { name: 'Main Door', position: null, pinGroup: null };
+  document.getElementById('row-door').addEventListener('click', () => selectSensor('door'));
+
+  // ── Sensor rows 1–10 ──
+  for (let i = 1; i <= NUM_SENSORS; i++) {
+    sensors[i] = { name: '', position: null, pinGroup: null };
+
+    const tr = document.createElement('tr');
+    tr.dataset.sensor = i;
+    tr.innerHTML = `
+      <td class="dot-cell"><span class="dot" id="dot-${i}"></span></td>
+      <td class="num-cell">${i}</td>
+      <td><input type="text" id="name-${i}" placeholder="e.g. Living Room" /></td>
+    `;
+    tbody.appendChild(tr);
+
+    tr.addEventListener('click', () => selectSensor(i));
+
+    const input = document.getElementById(`name-${i}`);
+    input.addEventListener('input', e => { sensors[i].name = e.target.value; });
+    input.addEventListener('click', e => e.stopPropagation());
+  }
+}
+
+function selectSensor(num) {
+  activeSensor = num;
+  // Deactivate all rows and the door div
+  document.querySelectorAll('#sensor-table tr').forEach(r => r.classList.remove('active'));
+  document.getElementById('row-door').classList.remove('active');
+  // Activate the selected element
+  if (num === 'door') {
+    document.getElementById('row-door').classList.add('active');
+  } else {
+    document.querySelector(`tr[data-sensor="${num}"]`).classList.add('active');
+  }
+  updateStatus();
+}
+
+function updateTableRow(num) {
+  const dot = document.getElementById(`dot-${num}`);
+  const placed = !!sensors[num].position;
+  const color  = (num === 'door') ? DOOR_COLOR : COLORS[(num - 1) % COLORS.length];
+  dot.style.background = placed ? color : 'transparent';
+}
+
+function updateStatus() {
+  const bar = document.getElementById('status-bar');
+  if (activeSensor !== null) {
+    const isDoor = (activeSensor === 'door');
+    const c      = isDoor ? DOOR_COLOR : COLORS[(activeSensor - 1) % COLORS.length];
+    const label  = isDoor ? 'Main Door' : `Sensor ${activeSensor}`;
+    bar.innerHTML = `Placing: <span style="color:${c};font-weight:bold">${label}</span> &mdash; click the house`;
+  } else {
+    bar.textContent = 'Click a sensor row to start placing';
+  }
+}
+
+// ── Save / Load ───────────────────────────────────────────────────────────────
+const LS_KEY = 'shieldeyes_locations';
+
+function applyData(data) {
+  if (!data) return;
+
+  // Restore compass orientation
+  if (typeof data.compassRotation === 'number') {
+    compassGroup.rotation.y = THREE.MathUtils.degToRad(data.compassRotation);
+  }
+
+  // Restore door landmark
+  if (data.door?.position) {
+    const p = data.door.position;
+    const nRaw = data.door.normal;
+    const n = nRaw ? new THREE.Vector3(nRaw.x, nRaw.y, nRaw.z) : new THREE.Vector3(0, 0, 1);
+    placePin('door', new THREE.Vector3(p.x, p.y, p.z), n);
+    sensors['door'].position = p;
+    sensors['door'].normal   = nRaw || null;
+  }
+
+  // Restore sensors 1–10
+  if (!data.sensors) return;
+  for (const [key, info] of Object.entries(data.sensors)) {
+    const num = parseInt(key);
+    if (num < 1 || num > NUM_SENSORS) continue;
+    sensors[num].name = info.name || '';
+    const input = document.getElementById(`name-${num}`);
+    if (input) input.value = sensors[num].name;
+    if (info.position) {
+      const pos = new THREE.Vector3(info.position.x, info.position.y, info.position.z);
+      placePin(num, pos);
+      sensors[num].position = info.position;
+    }
+  }
+}
+
+async function loadLocations() {
+  // Try server first; fall back to localStorage
+  try {
+    const res = await fetch('sensor_locations.php');
+    if (res.ok) {
+      const data = await res.json();
+      applyData(data);
+      return;
+    }
+  } catch (_) { /* server unavailable — try localStorage */ }
+
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) applyData(JSON.parse(raw));
+  } catch (e) {
+    console.warn('Could not load from localStorage:', e);
+  }
+}
+
+async function saveLocations() {
+  const msgEl = document.getElementById('save-msg');
+  const payload = {
+    compassRotation: +THREE.MathUtils.radToDeg(compassGroup.rotation.y).toFixed(2),
+    sensors: {}
+  };
+
+  const door = sensors['door'];
+  if (door.position) payload.door = { position: door.position, normal: door.normal || null };
+
+  for (let i = 1; i <= NUM_SENSORS; i++) {
+    const d = sensors[i];
+    if (d.name || d.position) {
+      payload.sensors[i] = { name: d.name, position: d.position || null };
+    }
+  }
+
+  // Try server; fall back to localStorage
+  let serverOk = false;
+  try {
+    const res = await fetch('sensor_locations.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    serverOk = !!result.ok;
+  } catch (_) { /* server unavailable */ }
+
+  if (serverOk) {
+    msgEl.style.color = '#4caf50';
+    msgEl.textContent = 'Saved!';
+  } else {
+    // Fall back to localStorage
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      msgEl.style.color = '#f5a500';
+      msgEl.textContent = 'Saved locally (no server)';
+    } catch (e) {
+      msgEl.style.color = '#e94560';
+      msgEl.textContent = 'Save failed.';
+    }
+  }
+
+  setTimeout(() => { msgEl.textContent = ''; }, 3000);
+}
+
+function clearAll() {
+  removePin('door');
+  for (let i = 1; i <= NUM_SENSORS; i++) {
+    removePin(i);
+    // Also clear the name input and stored name
+    sensors[i].name = '';
+    const input = document.getElementById(`name-${i}`);
+    if (input) input.value = '';
+  }
+  activeSensor = null;
+  document.querySelectorAll('#sensor-table tr').forEach(r => r.classList.remove('active'));
+  document.getElementById('row-door').classList.remove('active');
+  updateStatus();
+}
+
+// ── Resize ────────────────────────────────────────────────────────────────────
+function resize() {
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildTable();
+loadLocations();
+
+document.getElementById('btn-save').addEventListener('click', saveLocations);
+document.getElementById('btn-clear').addEventListener('click', clearAll);
+
+window.addEventListener('resize', resize);
+resize();
+
+// ── Render Loop ───────────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
