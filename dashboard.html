@@ -215,11 +215,11 @@
 
     window.tempChart = new Chart(document.getElementById("tempChart"), {
       type: "line", data: { labels: allTimestamps, datasets: tempDatasets },
-      options: { ...chartOpts, plugins: { title: { display: true, text: "Temperature (°C)" } }, scales: { ...chartOpts.scales } }
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Temperature (°C)" } }, scales: { ...chartOpts.scales } }
     });
     window.humChart = new Chart(document.getElementById("humChart"), {
       type: "line", data: { labels: allTimestamps, datasets: humDatasets },
-      options: { ...chartOpts, plugins: { title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
     });
 
     // CO2 chart — only shown when Sensor 0 data exists
@@ -235,7 +235,7 @@
       }];
       window.co2Chart = new Chart(document.getElementById("co2Chart"), {
         type: "line", data: { labels: co2TS, datasets: co2Dataset },
-        options: { ...chartOpts, plugins: { title: { display: true, text: "CO₂ (ppm)" } }, scales: { ...chartOpts.scales } }
+        options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "CO₂ (ppm)" } }, scales: { ...chartOpts.scales } }
       });
     } else {
       co2Wrap.style.display = "none";
