@@ -31,12 +31,14 @@
     }
     #panel.collapsed #panel-inner { min-width: 0; width: 0; overflow: hidden; }
     #panel-tab {
-      flex: 0 0 6px;
-      width: 6px;
-      min-width: 6px;
-      max-width: 6px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 10px;
       background: #0f3460;
       border: none;
+      border-right: 1px solid #1a4a7a;
       color: #ccc;
       cursor: pointer;
       display: flex;
@@ -46,8 +48,7 @@
       overflow: hidden;
       transition: background 0.15s;
       z-index: 20;
-      flex-shrink: 0;
-      border-right: 1px solid #1a4a7a;
+      padding: 0;
     }
     #panel-tab:hover { background: #1a4a90; color: #fff; }
 
@@ -221,11 +222,10 @@
 </div><!-- /#panel-inner -->
 </div><!-- /#panel -->
 
-<!-- ── Collapse Tab ── -->
-<button id="panel-tab" title="Hide panel">◀</button>
-
 <!-- ── 3D Canvas ── -->
 <div id="canvas-wrap">
+  <!-- Collapse Tab — absolutely positioned so flexbox never touches it -->
+  <button id="panel-tab" title="Hide panel">◀</button>
   <div id="hint">
     Drag to orbit &nbsp;|&nbsp; Scroll to zoom<br>
     Select a sensor, then click the house to place its pin
