@@ -22,12 +22,14 @@
     }
     #panel.collapsed { width: 0; min-width: 0; border-right: none; }
     #panel-inner {
+      width: 300px;
       min-width: 300px;
       display: flex;
       flex-direction: column;
       flex: 1;
       overflow-y: auto;
     }
+    #panel.collapsed #panel-inner { min-width: 0; width: 0; overflow: hidden; }
     #panel-tab {
       width: 18px;
       min-width: 18px;
