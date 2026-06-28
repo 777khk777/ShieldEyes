@@ -43,8 +43,17 @@ if ($data && isset($data['readings'])) {
                 $sensorNum = (int) preg_replace('/\D/', '', $r['sensor']);
                 $temp = round((float)$r['temperature'], 1);
                 $hum  = (int) round((float)$r['humidity']);
-                if ($sensorNum === 0 && isset($r['co2'])) {
-                    // Sensor 0: [num, temp, hum, co2]
+                if ($sensorNum === 0 && isset($r['pm1'])) {
+                    // Sensor 0 (SEN54): [num, temp, hum, pm1, pm25, pm4, pm10, voc]
+                    return [$sensorNum, $temp, $hum,
+                        round((float)$r['pm1'],  1),
+                        round((float)$r['pm25'], 1),
+                        round((float)$r['pm4'],  1),
+                        round((float)$r['pm10'], 1),
+                        (int)round((float)$r['voc'])
+                    ];
+                } elseif ($sensorNum === 0 && isset($r['co2'])) {
+                    // Sensor 0 legacy (CO2 sensor): [num, temp, hum, co2]
                     return [$sensorNum, $temp, $hum, (int)$r['co2']];
                 } else {
                     // All other sensors: [num, temp, hum]

@@ -75,6 +75,8 @@
 
   <div class="chart-container"><canvas id="tempChart"></canvas></div>
   <div class="chart-container"><canvas id="humChart"></canvas></div>
+  <div class="chart-container" id="pmChartWrap"  style="display:none"><canvas id="pmChart"></canvas></div>
+  <div class="chart-container" id="vocChartWrap" style="display:none"><canvas id="vocChart"></canvas></div>
   <div class="chart-container" id="co2ChartWrap" style="display:none"><canvas id="co2Chart"></canvas></div>
   <div id="readings"></div>
 
@@ -210,7 +212,9 @@
     };
 
     if (window.tempChart instanceof Chart) window.tempChart.destroy();
-    if (window.humChart instanceof Chart) window.humChart.destroy();
+    if (window.humChart  instanceof Chart) window.humChart.destroy();
+    if (window.pmChart   instanceof Chart) window.pmChart.destroy();
+    if (window.vocChart  instanceof Chart) window.vocChart.destroy();
     if (window.co2Chart  instanceof Chart) window.co2Chart.destroy();
 
     window.tempChart = new Chart(document.getElementById("tempChart"), {
@@ -221,6 +225,45 @@
       type: "line", data: { labels: allTimestamps, datasets: humDatasets },
       options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
     });
+
+    // PM chart — Sensor 0 (SEN54) only
+    const pmReadings = data.filter(r => r.pm1 !== null);
+    const pmWrap = document.getElementById("pmChartWrap");
+    if (pmReadings.length) {
+      pmWrap.style.display = "block";
+      const pmTS = [...new Set(pmReadings.map(r => r.timestamp))].sort();
+      const pmDatasets = [
+        { label: "PM 1.0",  field: "pm1",  color: "#f72585" },
+        { label: "PM 2.5",  field: "pm25", color: "#ff6b35" },
+        { label: "PM 4.0",  field: "pm4",  color: "#ffd166" },
+        { label: "PM 10",   field: "pm10", color: "#06d6a0" },
+      ].map(d => ({
+        label: d.label,
+        data: pmTS.map(t => { const f = pmReadings.find(x => x.timestamp === t); return f ? f[d.field] : null; }),
+        borderColor: d.color, borderWidth: 2.5, pointRadius: 1, fill: false, spanGaps: true
+      }));
+      window.pmChart = new Chart(document.getElementById("pmChart"), {
+        type: "line", data: { labels: pmTS, datasets: pmDatasets },
+        options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Particulate Matter (µg/m³)" } } }
+      });
+    } else {
+      pmWrap.style.display = "none";
+    }
+
+    // VOC chart — Sensor 0 (SEN54) only
+    const vocReadings = data.filter(r => r.voc !== null);
+    const vocWrap = document.getElementById("vocChartWrap");
+    if (vocReadings.length) {
+      vocWrap.style.display = "block";
+      const vocTS = [...new Set(vocReadings.map(r => r.timestamp))].sort();
+      window.vocChart = new Chart(document.getElementById("vocChart"), {
+        type: "line",
+        data: { labels: vocTS, datasets: [{ label: "VOC Index", data: vocTS.map(t => { const f = vocReadings.find(x => x.timestamp === t); return f ? f.voc : null; }), borderColor: "#a855f7", borderWidth: 2.5, pointRadius: 1, fill: false, spanGaps: true }] },
+        options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "VOC Index (1–500)" } } }
+      });
+    } else {
+      vocWrap.style.display = "none";
+    }
 
     // CO2 chart — only shown when Sensor 0 data exists
     const co2Readings = data.filter(r => r.co2 !== null);
@@ -252,19 +295,21 @@
         allData = [];
         rawData.forEach(entry => {
           if (entry.r) {
-            // Compact format: {ts, r: [[num,temp,hum] or [0,temp,hum,co2]]}
-            entry.r.forEach(r => allData.push({
-              sensor:      "Sensor " + r[0],
-              temperature: r[1],
-              humidity:    r[2],
-              co2:         r.length === 4 ? r[3] : null,  // only Sensor 0 has 4 elements
-              timestamp:   entry.ts
-            }));
+            entry.r.forEach(r => {
+              const obj = {
+                sensor: "Sensor " + r[0], temperature: r[1], humidity: r[2],
+                co2: null, pm1: null, pm25: null, pm4: null, pm10: null, voc: null,
+                timestamp: entry.ts
+              };
+              if (r.length === 4) obj.co2  = r[3];                                          // legacy CO2
+              if (r.length === 8) { obj.pm1=r[3]; obj.pm25=r[4]; obj.pm4=r[5]; obj.pm10=r[6]; obj.voc=r[7]; } // SEN54
+              allData.push(obj);
+            });
           } else if (entry.readings) {
-            // Old format fallback
             entry.readings.forEach(sr => allData.push({
-              sensor: sr.sensor, temperature: sr.temperature,
-              humidity: sr.humidity, co2: null, timestamp: entry.timestamp
+              sensor: sr.sensor, temperature: sr.temperature, humidity: sr.humidity,
+              co2: null, pm1: null, pm25: null, pm4: null, pm10: null, voc: null,
+              timestamp: entry.timestamp
             }));
           }
         });
