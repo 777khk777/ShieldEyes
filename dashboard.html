@@ -76,7 +76,6 @@
   <div class="chart-container"><canvas id="tempChart"></canvas></div>
   <div class="chart-container"><canvas id="humChart"></canvas></div>
   <div class="chart-container" id="pmChartWrap"  style="display:none"><canvas id="pmChart"></canvas></div>
-  <div class="chart-container" id="vocChartWrap" style="display:none"><canvas id="vocChart"></canvas></div>
   <div class="chart-container" id="co2ChartWrap" style="display:none"><canvas id="co2Chart"></canvas></div>
   <div id="readings"></div>
 
@@ -214,7 +213,6 @@
     if (window.tempChart instanceof Chart) window.tempChart.destroy();
     if (window.humChart  instanceof Chart) window.humChart.destroy();
     if (window.pmChart   instanceof Chart) window.pmChart.destroy();
-    if (window.vocChart  instanceof Chart) window.vocChart.destroy();
     if (window.co2Chart  instanceof Chart) window.co2Chart.destroy();
 
     window.tempChart = new Chart(document.getElementById("tempChart"), {
@@ -226,43 +224,45 @@
       options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Humidity (%)" } }, scales: { ...chartOpts.scales } }
     });
 
-    // PM chart — Sensor 0 (SEN54) only
-    const pmReadings = data.filter(r => r.pm1 !== null);
+    // Combined PM + VOC chart — Sensor 0 (SEN54) only
+    const pmReadings  = data.filter(r => r.pm1 !== null);
+    const vocReadings = data.filter(r => r.voc !== null);
     const pmWrap = document.getElementById("pmChartWrap");
-    if (pmReadings.length) {
+    if (pmReadings.length || vocReadings.length) {
       pmWrap.style.display = "block";
-      const pmTS = [...new Set(pmReadings.map(r => r.timestamp))].sort();
+      const allTS = [...new Set([...pmReadings, ...vocReadings].map(r => r.timestamp))].sort();
+      const combined = {};
+      [...pmReadings, ...vocReadings].forEach(r => { combined[r.timestamp] = { ...combined[r.timestamp], ...r }; });
       const pmDatasets = [
-        { label: "PM 1.0",  field: "pm1",  color: "#f72585" },
-        { label: "PM 2.5",  field: "pm25", color: "#ff6b35" },
-        { label: "PM 4.0",  field: "pm4",  color: "#ffd166" },
-        { label: "PM 10",   field: "pm10", color: "#06d6a0" },
+        { label: "PM 1.0", field: "pm1",  color: "#f72585" },
+        { label: "PM 2.5", field: "pm25", color: "#ff6b35" },
+        { label: "PM 4.0", field: "pm4",  color: "#ffd166" },
+        { label: "PM 10",  field: "pm10", color: "#06d6a0" },
       ].map(d => ({
-        label: d.label,
-        data: pmTS.map(t => { const f = pmReadings.find(x => x.timestamp === t); return f ? f[d.field] : null; }),
+        label: d.label, yAxisID: "y",
+        data: allTS.map(t => combined[t] ? combined[t][d.field] ?? null : null),
         borderColor: d.color, borderWidth: 2.5, pointRadius: 1, fill: false, spanGaps: true
       }));
+      const vocDataset = {
+        label: "VOC Index", yAxisID: "y1",
+        data: allTS.map(t => combined[t] ? combined[t].voc ?? null : null),
+        borderColor: "#a855f7", borderWidth: 2, borderDash: [5, 3], pointRadius: 1, fill: false, spanGaps: true
+      };
       window.pmChart = new Chart(document.getElementById("pmChart"), {
-        type: "line", data: { labels: pmTS, datasets: pmDatasets },
-        options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "Particulate Matter (µg/m³)" } } }
+        type: "line",
+        data: { labels: allTS, datasets: [...pmDatasets, vocDataset] },
+        options: {
+          ...chartOpts,
+          plugins: { ...chartOpts.plugins, title: { display: true, text: "Particulate Matter (µg/m³) & VOC Index" } },
+          scales: {
+            ...chartOpts.scales,
+            y:  { title: { display: true, text: "µg/m³" }, position: "left" },
+            y1: { title: { display: true, text: "VOC Index" }, position: "right", min: 0, max: 500, grid: { drawOnChartArea: false } }
+          }
+        }
       });
     } else {
       pmWrap.style.display = "none";
-    }
-
-    // VOC chart — Sensor 0 (SEN54) only
-    const vocReadings = data.filter(r => r.voc !== null);
-    const vocWrap = document.getElementById("vocChartWrap");
-    if (vocReadings.length) {
-      vocWrap.style.display = "block";
-      const vocTS = [...new Set(vocReadings.map(r => r.timestamp))].sort();
-      window.vocChart = new Chart(document.getElementById("vocChart"), {
-        type: "line",
-        data: { labels: vocTS, datasets: [{ label: "VOC Index", data: vocTS.map(t => { const f = vocReadings.find(x => x.timestamp === t); return f ? f.voc : null; }), borderColor: "#a855f7", borderWidth: 2.5, pointRadius: 1, fill: false, spanGaps: true }] },
-        options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: "VOC Index (1–500)" } } }
-      });
-    } else {
-      vocWrap.style.display = "none";
     }
 
     // CO2 chart — only shown when Sensor 0 data exists
