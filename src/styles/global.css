@@ -9,13 +9,3 @@
   --color-section-bg: #F3F4F6;
 }
 
-@layer base {
-  :root {
-    --color-green: #2D8B57;
-    --color-purple: #7B5BAD;
-    --color-hero-bg: #111827;
-    --color-body-bg: #F9FAFB;
-    --color-text: #1F2937;
-    --color-section-bg: #F3F4F6;
-  }
-}

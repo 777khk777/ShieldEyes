@@ -1,9 +1,17 @@
 ---
 interface Props {
-  variant?: 'hero' | 'page';
+  variant?: 'hero' | 'page' | 'on-green';
 }
 
 const { variant = 'page' } = Astro.props;
+
+const buttonClass = variant === 'on-green'
+  ? 'px-6 py-3 bg-white text-green font-semibold rounded-lg hover:bg-gray-100 transition-colors'
+  : 'px-6 py-3 bg-[#2D8B57] text-white font-semibold rounded-lg hover:bg-[#25744A] transition-colors';
+
+const helperClass = variant === 'page'
+  ? 'text-sm mt-2 opacity-70 text-text'
+  : 'text-sm mt-2 opacity-70 text-white';
 ---
 <form name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field">
   <input type="hidden" name="form-name" value="waitlist" />
@@ -18,10 +26,10 @@ const { variant = 'page' } = Astro.props;
     />
     <button
       type="submit"
-      class="px-6 py-3 bg-[#2D8B57] text-white font-semibold rounded-lg hover:bg-[#25744A] transition-colors"
+      class={buttonClass}
     >
       Join Waitlist
     </button>
   </div>
-  <p class={`text-sm mt-2 opacity-70 ${variant === 'hero' ? 'text-white' : 'text-text'}`}>No spam. Unsubscribe anytime.</p>
+  <p class={helperClass}>No spam. Unsubscribe anytime.</p>
 </form>
