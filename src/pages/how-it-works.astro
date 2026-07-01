@@ -1,0 +1,167 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="How It Works"
+  description="The ShieldEyes architecture: probe, wireless node, gateway, and dashboard — designed for Passive House builders."
+>
+
+  {/* Hero */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        Built for Builders. Designed to Last.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        ShieldEyes monitors your assembly continuously — from installation day through handoff and beyond.
+      </p>
+    </div>
+  </section>
+
+  {/* Section: The System — 4-step flow */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-text text-center mb-14">The System</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <div class="relative flex flex-col">
+          <div class="flex items-center mb-4">
+            <span class="flex-shrink-0 w-10 h-10 rounded-full bg-green text-white font-bold text-lg flex items-center justify-center">
+              1
+            </span>
+            <div class="flex-1 hidden lg:block h-px bg-gray-200 ml-3"></div>
+          </div>
+          <h3 class="text-lg font-semibold text-text mb-2">The Probe</h3>
+          <p class="text-gray-600 leading-relaxed text-sm">
+            A small RH/temperature sensor (SHT40) installed inside the wall assembly at rough framing.
+            The probe is positioned in the highest-risk zone — typically between the insulation and sheathing.
+          </p>
+        </div>
+
+        <div class="relative flex flex-col">
+          <div class="flex items-center mb-4">
+            <span class="flex-shrink-0 w-10 h-10 rounded-full bg-green text-white font-bold text-lg flex items-center justify-center">
+              2
+            </span>
+            <div class="flex-1 hidden lg:block h-px bg-gray-200 ml-3"></div>
+          </div>
+          <h3 class="text-lg font-semibold text-text mb-2">The Wireless Node</h3>
+          <p class="text-gray-600 leading-relaxed text-sm">
+            The node housing the probe electronics is accessible from inside the building — designed to
+            fit through a small penetration in drywall or baseboard, not buried in the wall cavity.
+            ~5–6 year battery. Wireless BLE transmission to the gateway.
+          </p>
+        </div>
+
+        <div class="relative flex flex-col">
+          <div class="flex items-center mb-4">
+            <span class="flex-shrink-0 w-10 h-10 rounded-full bg-green text-white font-bold text-lg flex items-center justify-center">
+              3
+            </span>
+            <div class="flex-1 hidden lg:block h-px bg-gray-200 ml-3"></div>
+          </div>
+          <h3 class="text-lg font-semibold text-text mb-2">The Gateway</h3>
+          <p class="text-gray-600 leading-relaxed text-sm">
+            A small device (XIAO ESP32-C6) located inside the conditioned space — plugged in, always on.
+            Collects data from all nodes in range, adds air quality readings (VOC/PM via SEN54),
+            and uploads to the dashboard.
+          </p>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="flex items-center mb-4">
+            <span class="flex-shrink-0 w-10 h-10 rounded-full bg-green text-white font-bold text-lg flex items-center justify-center">
+              4
+            </span>
+          </div>
+          <h3 class="text-lg font-semibold text-text mb-2">The Dashboard</h3>
+          <p class="text-gray-600 leading-relaxed text-sm">
+            Live and historical graphs of RH, temperature, and dew point for every probe in the
+            assembly. Set alert thresholds (e.g. RH &gt; 80% sustained). Accessible from any
+            browser at app.shieldeyes.co.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  {/* Section: Key Specs */}
+  <section class="bg-section-bg py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-10">Key Specs</h2>
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <tbody>
+            <tr class="border-b border-gray-100">
+              <td class="px-6 py-4 font-semibold text-text w-2/5">RH Sensor</td>
+              <td class="px-6 py-4 text-gray-600">Sensirion SHT40 (&plusmn;1.5% RH, &plusmn;0.2&deg;C)</td>
+            </tr>
+            <tr class="border-b border-gray-100 bg-gray-50">
+              <td class="px-6 py-4 font-semibold text-text">Air Quality (Gateway)</td>
+              <td class="px-6 py-4 text-gray-600">Sensirion SEN54 — PM1/2.5, VOC Index, Temp, Humidity</td>
+            </tr>
+            <tr class="border-b border-gray-100">
+              <td class="px-6 py-4 font-semibold text-text">Wireless</td>
+              <td class="px-6 py-4 text-gray-600">BLE (Bluetooth Low Energy)</td>
+            </tr>
+            <tr class="border-b border-gray-100 bg-gray-50">
+              <td class="px-6 py-4 font-semibold text-text">Battery Life</td>
+              <td class="px-6 py-4 text-gray-600">~5–6 years (estimated)</td>
+            </tr>
+            <tr class="border-b border-gray-100">
+              <td class="px-6 py-4 font-semibold text-text">Node Access</td>
+              <td class="px-6 py-4 text-gray-600">Accessible from conditioned space — never buried</td>
+            </tr>
+            <tr class="border-b border-gray-100 bg-gray-50">
+              <td class="px-6 py-4 font-semibold text-text">Dashboard</td>
+              <td class="px-6 py-4 text-gray-600">Web-based, browser access, real-time + historical</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 font-semibold text-text">Installation</td>
+              <td class="px-6 py-4 text-gray-600">During rough framing; no rewiring required</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  {/* Section: Designed to Be Serviced */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-6">
+        The unit you won't have to tear open a wall to fix.
+      </h2>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        Every other monitoring solution we evaluated required burying the sensor and accepting that
+        it's unserviceable. ShieldEyes is designed from the ground up to be retrieved, inspected,
+        and replaced without opening the wall assembly. That's not an afterthought — it's the core
+        design constraint.
+      </p>
+    </div>
+  </section>
+
+  {/* CTA */}
+  <section class="bg-green py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-10">Ready to protect your builds?</h2>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/waitlist"
+          class="px-8 py-4 bg-white text-green font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          Join the waitlist
+        </a>
+        <a
+          href="/for-builders"
+          class="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-green transition-colors"
+        >
+          Read the builder case
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>

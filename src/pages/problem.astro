@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="The Problem"
+  description="Why Passive House assemblies need continuous moisture monitoring — and why point-in-time checks aren't enough."
+>
+
+  {/* Hero */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        High-Performance Envelopes Have a Hidden Risk
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        Airtight, well-insulated assemblies are better at trapping moisture than they are at drying it out.
+      </p>
+    </div>
+  </section>
+
+  {/* Section: The Passive House Moisture Trap */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-text text-center mb-14">The Passive House Moisture Trap</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+        <div>
+          <h3 class="text-xl font-semibold text-text mb-3">Airtight = moisture stays put</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Traditional construction leaks air — and moisture. Passive House assemblies are so tight
+            that moisture introduced during construction or from occupants has nowhere to go.
+            What used to dry out over a summer now sits.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold text-text mb-3">Damage happens invisibly, mid-assembly</h3>
+          <p class="text-gray-600 leading-relaxed">
+            By the time you see mold or rot, the damage is months old. The critical risk window is
+            between framing and drywall — when insulation and sheathing are in place but conditions
+            aren't yet controlled.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold text-text mb-3">Blower door tests check air — not moisture</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Your QA checklist catches air leakage and thermal bridging. But no standard test tells
+            you whether RH inside the assembly stayed below the damage threshold during the
+            construction window.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  {/* Section: Why Point-in-Time Checks Miss It */}
+  <section class="bg-section-bg py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-8">A snapshot doesn't tell the story</h2>
+      <p class="text-gray-600 leading-relaxed text-lg mb-10">
+        A moisture meter reading on day 30 of a 90-day assembly window tells you conditions on day 30.
+        It says nothing about what happened on day 12 after a rainy week, or day 47 when the HVAC
+        wasn't commissioned yet. Moisture damage is cumulative. You need the full curve, not a spot check.
+      </p>
+      <blockquote class="border-l-4 border-green pl-6 py-4 bg-white rounded-r-lg shadow-sm">
+        <p class="text-text font-semibold text-xl leading-snug">
+          "The question isn't 'is it wet now?' It's 'was it ever too wet, for too long?'"
+        </p>
+      </blockquote>
+    </div>
+  </section>
+
+  {/* Section: ShieldEyes Solves This */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-8">ShieldEyes Solves This</h2>
+      <p class="text-gray-600 leading-relaxed text-lg mb-6">
+        ShieldEyes provides continuous RH, temperature, and dew-point monitoring inside the wall
+        assembly — from rough framing through commissioning and occupancy. Not a spot check. A log.
+      </p>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        Because the probe and module are designed to remain accessible (never buried in drywall),
+        you can retrieve the device, inspect it, or replace it after handoff. The data lives in
+        your dashboard. If a warranty claim ever comes up, you have the record.
+      </p>
+    </div>
+  </section>
+
+  {/* CTA */}
+  <section class="bg-green py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-10">Ready to see the solution?</h2>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/how-it-works"
+          class="px-8 py-4 bg-white text-green font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          See how it works
+        </a>
+        <a
+          href="/waitlist"
+          class="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-green transition-colors"
+        >
+          Join the waitlist
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
