@@ -1,13 +1,130 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import WaitlistForm from '../components/WaitlistForm.astro';
 ---
 
 <Layout
-  title="ShieldEyes — Passive House Moisture Monitoring"
-  description="Continuous moisture monitoring for high-performance building envelopes."
+  title="Moisture Monitoring for High-Performance Builds"
+  description="ShieldEyes provides continuous, in-wall moisture monitoring for Passive House builders. Catch moisture before it becomes rot."
 >
-  <section class="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-    <h1 class="text-4xl font-bold text-text">ShieldEyes — Coming Soon</h1>
-    <p class="mt-4 text-lg text-gray-500">Continuous moisture monitoring for high-performance envelopes.</p>
+
+  {/* Section 1: Hero */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        Catch moisture inside the wall before it becomes rot.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        Continuous, in-wall RH monitoring for Passive House and high-performance envelopes.
+        Know what's happening mid-assembly — before drywall goes up.
+      </p>
+      <div class="mt-10 max-w-xl mx-auto">
+        <WaitlistForm variant="hero" />
+      </div>
+      <div class="mt-6">
+        <a
+          href="/how-it-works"
+          class="text-white underline underline-offset-4 hover:text-green transition-colors text-base font-medium"
+        >
+          See how it works →
+        </a>
+      </div>
+    </div>
   </section>
+
+  {/* Section 2: How It Works */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-text text-center mb-14">How ShieldEyes Works</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div class="flex flex-col items-center text-center">
+          <span class="text-5xl mb-4" aria-hidden="true">📡</span>
+          <h3 class="text-xl font-semibold text-text mb-3">Probe in the Assembly</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Install the ShieldEyes probe inside the wall assembly during construction.
+            No drywall burial — the module stays accessible.
+          </p>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <span class="text-5xl mb-4" aria-hidden="true">📶</span>
+          <h3 class="text-xl font-semibold text-text mb-3">Wireless Node → Gateway</h3>
+          <p class="text-gray-600 leading-relaxed">
+            The node transmits RH, temperature, and dew-point data wirelessly to the gateway.
+            ~5–6 year battery. No wiring.
+          </p>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <span class="text-5xl mb-4" aria-hidden="true">📊</span>
+          <h3 class="text-xl font-semibold text-text mb-3">Dashboard + Alerts</h3>
+          <p class="text-gray-600 leading-relaxed">
+            View live and historical data. Set thresholds. Get alerted before conditions
+            become a problem.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 3: Trust / Credibility */}
+  <section class="bg-section-bg py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-6">
+
+        <div class="flex-1 min-w-[200px] bg-white rounded-lg px-6 py-5 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-widest text-green mb-1">CPHT Certified</p>
+          <p class="text-sm text-gray-600">Certified Passive House Technician</p>
+        </div>
+
+        <div class="flex-1 min-w-[200px] bg-white rounded-lg px-6 py-5 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-widest text-green mb-1">Passive House Focused</p>
+          <p class="text-sm text-gray-600">Built specifically for high-performance envelopes</p>
+        </div>
+
+        <div class="flex-1 min-w-[200px] bg-white rounded-lg px-6 py-5 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-widest text-green mb-1">Designed to be Serviced</p>
+          <p class="text-sm text-gray-600">Never buried. Always accessible.</p>
+        </div>
+
+        <div class="flex-1 min-w-[200px] bg-white rounded-lg px-6 py-5 shadow-sm">
+          <p class="text-xs font-semibold uppercase tracking-widest text-green mb-1">Oshawa ADU Proof-of-Concept</p>
+          <p class="text-sm text-gray-600">Live in a real Passive House build in 2026</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  {/* Section 4: The Problem Teaser */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-text mb-6">Why Continuous Monitoring Matters</h2>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        Airtight, well-insulated Passive House assemblies trap moisture that used to dry out.
+        Damage happens mid-assembly, invisibly, months before any surface sign.
+        Point-in-time checks miss it.
+      </p>
+      <div class="mt-8">
+        <a
+          href="/problem"
+          class="text-green font-medium underline underline-offset-4 hover:opacity-80 transition-opacity text-base"
+        >
+          Read more about the problem →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Section 5: Final CTA */}
+  <section class="bg-green py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">Ready to protect your builds?</h2>
+      <p class="text-white opacity-90 text-lg mb-10">
+        Join the waitlist for early access. Proof-of-concept launching in Oshawa, Ontario in 2026.
+      </p>
+      <div class="max-w-xl mx-auto">
+        <WaitlistForm variant="hero" />
+      </div>
+    </div>
+  </section>
+
 </Layout>
