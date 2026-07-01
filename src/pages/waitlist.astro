@@ -1,0 +1,121 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Join the Waitlist"
+  description="Get early access to ShieldEyes continuous moisture monitoring for Passive House builders."
+>
+
+  <section class="bg-section-bg min-h-screen py-20 px-4">
+    <div class="max-w-2xl mx-auto">
+      <div class="text-center mb-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-text mb-4">
+          Join the ShieldEyes Waitlist
+        </h1>
+        <p class="text-gray-600 text-lg leading-relaxed">
+          We're building the first units now. Tell us about your project and we'll reach out when early access opens.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-8 sm:p-10">
+        <form name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="waitlist" />
+          <p class="hidden"><label>Don't fill: <input name="bot-field" /></label></p>
+
+          <div class="space-y-6">
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">Name <span class="text-red-500">*</span></span>
+              <input
+                type="text"
+                name="name"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text"
+                placeholder="Your full name"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">Email <span class="text-red-500">*</span></span>
+              <input
+                type="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text"
+                placeholder="your@email.com"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">Company / Builder name</span>
+              <input
+                type="text"
+                name="company"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text"
+                placeholder="Your company or trading name"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">I am a...</span>
+              <select
+                name="role"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text bg-white"
+              >
+                <option value="builder">Passive House builder / contractor</option>
+                <option value="homeowner">Homeowner / self-builder</option>
+                <option value="designer">Architect / designer</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">How many units are you interested in?</span>
+              <select
+                name="units"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text bg-white"
+              >
+                <option value="1">1 (single project)</option>
+                <option value="2-5">2–5</option>
+                <option value="6-20">6–20 (multi-project)</option>
+                <option value="20+">20+ (volume)</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">Project timeline</span>
+              <input
+                type="text"
+                name="timeline"
+                placeholder="e.g. Spring 2027 framing"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-semibold text-text mb-1.5">Anything else you'd like us to know?</span>
+              <textarea
+                name="message"
+                rows="3"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2D8B57] text-text resize-y"
+                placeholder="Tell us about your project, questions, or anything else..."
+              ></textarea>
+            </label>
+
+            <button
+              type="submit"
+              class="w-full px-6 py-4 bg-[#2D8B57] text-white font-semibold rounded-lg hover:bg-[#25744A] transition-colors text-base"
+            >
+              Join the Waitlist
+            </button>
+
+          </div>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">No spam. We'll only reach out about early access and ShieldEyes updates.</p>
+      </div>
+    </div>
+  </section>
+
+</Layout>

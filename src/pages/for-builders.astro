@@ -1,0 +1,137 @@
+---
+import Layout from '../layouts/Layout.astro';
+import WaitlistForm from '../components/WaitlistForm.astro';
+---
+
+<Layout
+  title="For Builders"
+  description="How ShieldEyes helps Passive House builders reduce warranty risk, prove performance, and differentiate their work."
+>
+
+  {/* Hero */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        De-risk your builds. Differentiate your work.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        ShieldEyes gives Passive House builders a continuous record of what happened inside the assembly — before, during, and after handoff.
+      </p>
+    </div>
+  </section>
+
+  {/* Section: The Builder's Case */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-text text-center mb-14">The Builder's Case</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <div class="bg-section-bg rounded-lg p-8">
+          <h3 class="text-xl font-semibold text-text mb-4">Reduce Warranty Risk</h3>
+          <p class="text-gray-600 leading-relaxed">
+            When a homeowner calls two years later claiming moisture damage, you have two options: take their word for it, or show them the log. ShieldEyes gives you the log. If RH inside the assembly never exceeded safe thresholds from day one, you have documentation. If it did spike — you know when and why, and you caught it.
+          </p>
+        </div>
+
+        <div class="bg-section-bg rounded-lg p-8">
+          <h3 class="text-xl font-semibold text-text mb-4">Prove Envelope Performance</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Blower door numbers prove air tightness. ShieldEyes adds the moisture half of the performance story. Show clients and certifiers that your assemblies perform the way the design intended — continuously, not just on test day.
+          </p>
+        </div>
+
+        <div class="bg-section-bg rounded-lg p-8">
+          <h3 class="text-xl font-semibold text-text mb-4">Differentiate in a Crowded Market</h3>
+          <p class="text-gray-600 leading-relaxed">
+            High-performance building is still a small market, and builders who can prove their work stand out. Being the builder who monitors what's inside the wall — and can show the data — is a differentiator that's hard to copy.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  {/* Section: Fits Your Workflow */}
+  <section class="bg-section-bg py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-6">No disruption to how you build.</h2>
+      <p class="text-gray-600 leading-relaxed text-lg mb-8">
+        ShieldEyes installs during rough framing — one step, one device per critical assembly. No wiring. No additional trades. The gateway goes on a shelf in the mechanical room. From there, data flows automatically. You check the dashboard when you want to, and it alerts you when something needs attention.
+      </p>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-3">
+          <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <span class="text-gray-700">Installs in minutes during rough framing</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <span class="text-gray-700">No wiring — battery powered node, plugged-in gateway</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <span class="text-gray-700">Works with your existing WiFi</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <span class="text-gray-700">Dashboard accessible from phone or laptop</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <span class="text-gray-700">One gateway covers a typical residential build</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  {/* Section: Early Access */}
+  <section class="bg-green py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <p class="text-white text-lg leading-relaxed mb-10 opacity-95">
+        ShieldEyes is in active development. The first proof-of-concept is going into a Passive House ADU in Oshawa, Ontario in 2026. Early-access builders will receive priority pricing and direct input into features.
+      </p>
+      <p class="text-white font-semibold mb-4 opacity-90">Get early access:</p>
+      <div class="max-w-xl mx-auto">
+        <WaitlistForm variant="hero" />
+      </div>
+    </div>
+  </section>
+
+  {/* CTA Row */}
+  <section class="bg-white py-16 px-4">
+    <div class="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="mailto:hello@shieldeyes.co?subject=Builder%20Inquiry"
+        class="px-8 py-4 bg-green text-white font-semibold rounded-lg hover:bg-[#25744A] transition-colors text-center"
+      >
+        Book a call
+      </a>
+      <a
+        href="/how-it-works"
+        class="px-8 py-4 border-2 border-green text-green font-semibold rounded-lg hover:bg-green hover:text-white transition-colors text-center"
+      >
+        See how it works
+      </a>
+    </div>
+  </section>
+
+</Layout>
