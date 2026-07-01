@@ -1,0 +1,55 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// When blog posts are added as Markdown files, set up Astro content collections
+// in src/content/blog/ with a config in src/content/config.ts, then use:
+//   const posts = await getCollection('blog');
+// and render them in the posts list area below.
+// For now: empty state — no posts yet.
+const posts: never[] = [];
+---
+
+<Layout
+  title="Blog"
+  description="Build journals, moisture science, and Passive House construction learnings from the ShieldEyes team."
+>
+
+  {/* Header */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        From the Build
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        Construction journals, moisture science, and lessons from the Oshawa ADU proof-of-concept.
+      </p>
+    </div>
+  </section>
+
+  {/* Posts area */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      {posts.length > 0 ? (
+        <ul class="space-y-8">
+          {/* Post list will render here once content collections are set up */}
+        </ul>
+      ) : (
+        <div class="max-w-lg mx-auto text-center py-16 px-6 bg-section-bg rounded-2xl">
+          <p class="text-4xl mb-6" aria-hidden="true">🏗️</p>
+          <h2 class="text-xl font-semibold text-text mb-3">No posts yet</h2>
+          <p class="text-gray-600 leading-relaxed mb-8">
+            We're building. Posts will appear here as the Oshawa ADU proof-of-concept progresses.
+            Follow along by joining the waitlist — we'll notify you when new content is published.
+          </p>
+          <a
+            href="/waitlist"
+            class="inline-block px-8 py-4 bg-green text-white font-semibold rounded-lg hover:opacity-90 transition-opacity text-base"
+          >
+            Join Waitlist
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+</Layout>

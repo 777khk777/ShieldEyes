@@ -1,0 +1,89 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="About"
+  description="The story behind ShieldEyes — built by a builder who wanted to monitor what's happening inside his own walls."
+>
+
+  {/* Hero */}
+  <section class="bg-hero-bg py-24 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight">
+        Built by a Builder
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-300 leading-relaxed">
+        ShieldEyes started with one question: how do I know if the wall assembly I'm building is actually performing the way I designed it?
+      </p>
+    </div>
+  </section>
+
+  {/* Section: Founder Story */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-8">Engineer → CPA → CPHT → Builder</h2>
+      <div class="space-y-6 text-gray-600 leading-relaxed text-lg">
+        <p>
+          ShieldEyes was created by a builder who took an unusual path to construction: engineering background, chartered accounting practice, and a CPHT (Certified Passive House Technician) credential — before ever picking up a framing nailer. The decision to build a Passive House ADU in Oshawa, Ontario wasn't just a construction project. It was a test case for everything learned along the way.
+        </p>
+        <p>
+          The moisture monitoring problem became obvious during the design phase. The assembly was well-designed — high-quality membranes, careful detailing, proper thermal bridging analysis. But the construction window — the weeks between sheathing and drywall — had no coverage. A moisture meter spot check on day 30 doesn't tell you what happened on day 12 after a week of rain. There was no product that logged continuously, was designed to be serviced, and fit a residential budget.
+        </p>
+        <p>
+          So ShieldEyes was built from scratch. The Oshawa ADU is the first proof-of-concept installation — a real build, monitored in real time. Everything learned there shapes the product that will eventually ship to builders across Canada and beyond.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section: The Proof-of-Concept */}
+  <section class="py-20 px-4" style="background-color: #F3F4F6;">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-8">The Oshawa ADU</h2>
+      <div class="space-y-6 text-gray-600 leading-relaxed text-lg">
+        <p>
+          The first ShieldEyes installation is in an accessory dwelling unit being constructed in Oshawa, Ontario in 2026. It's a Passive House-standard build: triple-pane windows, continuous exterior insulation, air barrier fully sealed. The sensors go in during framing. The data starts flowing from day one.
+        </p>
+        <p>
+          This isn't a lab test. It's the real thing — the same conditions, the same construction challenges, the same weather that any builder in southern Ontario faces. When ShieldEyes ships to early-access builders, it will have been tested in exactly the kind of project it's meant for.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Section: Long-Term Vision */}
+  <section class="bg-white py-20 px-4">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-3xl font-bold text-text mb-8">Where This Is Going</h2>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        The ADU is the beginning. The longer-term direction is panelized and volumetric prefab construction — where assemblies are built in a factory, shipped to site, and stacked. In that model, monitoring the assembly from the factory floor through shipping, site storage, and installation becomes even more critical. ShieldEyes is being designed with that future in mind.
+      </p>
+    </div>
+  </section>
+
+  {/* CTA */}
+  <section class="bg-green py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">Want to follow the build?</h2>
+      <p class="text-white opacity-90 text-lg mb-10">
+        We're documenting the Oshawa ADU proof-of-concept as it progresses. Join the waitlist to stay in the loop.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/blog"
+          class="px-8 py-4 bg-white text-green font-semibold rounded-lg hover:bg-gray-100 transition-colors text-base text-center"
+        >
+          Follow the build
+        </a>
+        <a
+          href="/waitlist"
+          class="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-green transition-colors text-base text-center"
+        >
+          Join the waitlist
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
