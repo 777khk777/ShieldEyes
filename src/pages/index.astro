@@ -1,17 +1,13 @@
 ---
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/shieldeyes-favicon.svg" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/shieldeyes-favicon-32.png" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>ShieldEyes — Passive House Moisture Monitoring</title>
-	</head>
-	<body class="bg-body-bg text-text">
-		<h1>ShieldEyes — Coming Soon</h1>
-	</body>
-</html>
+<Layout
+  title="ShieldEyes — Passive House Moisture Monitoring"
+  description="Continuous moisture monitoring for high-performance building envelopes."
+>
+  <section class="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+    <h1 class="text-4xl font-bold text-text">ShieldEyes — Coming Soon</h1>
+    <p class="mt-4 text-lg text-gray-500">Continuous moisture monitoring for high-performance envelopes.</p>
+  </section>
+</Layout>

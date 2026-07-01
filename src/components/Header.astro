@@ -1,0 +1,89 @@
+---
+const pathname = Astro.url.pathname;
+
+const navLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'The Problem', href: '/problem' },
+  { label: 'How It Works', href: '/how-it-works' },
+  { label: 'For Builders', href: '/for-builders' },
+  { label: 'Blog', href: '/blog' },
+];
+---
+<header class="sticky top-0 z-50 bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a href="/" class="flex-shrink-0">
+        <img src="/shieldeyes-lockup.png" alt="ShieldEyes" class="h-8" />
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-6">
+        {navLinks.map(link => (
+          <a
+            href={link.href}
+            class={`text-sm font-medium transition-colors hover:text-green ${
+              pathname === link.href ? 'text-green' : 'text-text'
+            }`}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Desktop CTAs -->
+      <div class="hidden md:flex items-center gap-4">
+        <a
+          href="https://app.shieldeyes.co"
+          class="text-sm font-medium text-text hover:text-green transition-colors"
+        >
+          Login &rarr;
+        </a>
+        <a
+          href="/waitlist"
+          class="px-4 py-2 bg-[#2D8B57] text-white text-sm font-semibold rounded-lg hover:bg-[#25744A] transition-colors"
+        >
+          Join Waitlist
+        </a>
+      </div>
+
+      <!-- Mobile hamburger label -->
+      <label for="mobile-menu-toggle" class="md:hidden cursor-pointer p-2" aria-label="Open menu">
+        <svg class="h-6 w-6 text-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Checkbox toggle (hidden) + mobile nav -->
+  <input type="checkbox" id="mobile-menu-toggle" class="hidden peer" />
+  <nav class="hidden peer-checked:block md:hidden border-t border-gray-200 bg-white px-4 pb-4 pt-2">
+    {navLinks.map(link => (
+      <a
+        href={link.href}
+        class={`block py-2 text-sm font-medium transition-colors hover:text-green ${
+          pathname === link.href ? 'text-green' : 'text-text'
+        }`}
+      >
+        {link.label}
+      </a>
+    ))}
+    <div class="mt-4 flex flex-col gap-3">
+      <a
+        href="https://app.shieldeyes.co"
+        class="text-sm font-medium text-text hover:text-green transition-colors"
+      >
+        Login &rarr;
+      </a>
+      <a
+        href="/waitlist"
+        class="px-4 py-2 bg-[#2D8B57] text-white text-sm font-semibold rounded-lg hover:bg-[#25744A] transition-colors text-center"
+      >
+        Join Waitlist
+      </a>
+    </div>
+  </nav>
+</header>
