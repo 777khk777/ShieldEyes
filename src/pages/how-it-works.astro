@@ -34,7 +34,7 @@ import Layout from '../layouts/Layout.astro';
           </div>
           <h3 class="text-lg font-semibold text-text mb-2">The Probe</h3>
           <p class="text-gray-600 leading-relaxed text-sm">
-            A small RH/temperature sensor (SHT40) installed inside the wall assembly at rough framing.
+            A small RH/temperature sensor installed inside the wall assembly at rough framing or after.
             The probe is positioned in the highest-risk zone — typically between the insulation and sheathing.
           </p>
         </div>
@@ -63,9 +63,9 @@ import Layout from '../layouts/Layout.astro';
           </div>
           <h3 class="text-lg font-semibold text-text mb-2">The Gateway</h3>
           <p class="text-gray-600 leading-relaxed text-sm">
-            A small device (XIAO ESP32-C6) located inside the conditioned space — plugged in, always on.
-            Collects data from all nodes in range, adds air quality readings (VOC/PM via SEN54),
-            and uploads to the dashboard.
+            A compact microcontroller inside the conditioned space — plugged in and always on.
+            It gathers data from every node in range, adds its own indoor readings for temperature,
+            humidity, and air quality (VOC, PM1.0, PM2.5), and uploads everything to your dashboard.
           </p>
         </div>
 
@@ -77,9 +77,9 @@ import Layout from '../layouts/Layout.astro';
           </div>
           <h3 class="text-lg font-semibold text-text mb-2">The Dashboard</h3>
           <p class="text-gray-600 leading-relaxed text-sm">
-            Live and historical graphs of RH, temperature, and dew point for every probe in the
-            assembly. Set alert thresholds (e.g. RH &gt; 80% sustained). Accessible from any
-            browser at app.shieldeyes.co.
+            Live and historical graphs — RH and temperature for every probe in the assembly,
+            plus PM1.0, PM2.5, and VOC for indoor conditions. Set alert thresholds and access
+            everything from any browser at app.shieldeyes.co.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ import Layout from '../layouts/Layout.astro';
           <tbody>
             <tr class="border-b border-gray-100">
               <td class="px-6 py-4 font-semibold text-text w-2/5">RH Sensor</td>
-              <td class="px-6 py-4 text-gray-600">Sensirion SHT40 (&plusmn;1.5% RH, &plusmn;0.2&deg;C)</td>
+              <td class="px-6 py-4 text-gray-600">&plusmn;1.5% RH, &plusmn;0.2&deg;C accuracy</td>
             </tr>
             <tr class="border-b border-gray-100 bg-gray-50">
               <td class="px-6 py-4 font-semibold text-text">Air Quality (Gateway)</td>
